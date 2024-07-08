@@ -1,0 +1,6 @@
+sim/Project Backups/
+sim/*.pdsprj.*
+prj/Aqua.X/build/
+prj/Aqua.X/debug/
+prj/Aqua.X/dist/
+prj/Aqua.X/nbproject/private
