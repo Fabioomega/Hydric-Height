@@ -59,7 +59,7 @@ inline void handle_tmr2_interrupt(void)
     extra_timer++;
 }
 
-inline uint8_t read_sensor(void)
+inline uint16_t read_sensor(void)
 {
     start_sensor_reading();
     while (echo_cycle != 1) continue;
@@ -67,7 +67,9 @@ inline uint8_t read_sensor(void)
     while (echo_cycle != 0) continue;
     tm2 = stop_timer();
     
-    return (uint8_t)((uint16_t) ((float)tm2*conversion_factor));
+    
+    
+    return ((uint16_t) ((float)tm2*conversion_factor));
 }
 
 #ifdef	__cplusplus

@@ -55,6 +55,16 @@ inline __bit is_write_finished(void) {
     return idx == size;
 }
 
+void write_uint8(uint8_t data) {
+    // Is the EEPROM full?
+    if (last_filled_memory_pos == 255) return;
+    // Save the first value to the buffer
+    buffer[size] = data;
+    // Save the location to be saved at
+    memory_locations[size] = last_filled_memory_pos;
+    size++;
+}
+
 void write_uint16(uint16_t data) {
     // Is the EEPROM full?
     if (last_filled_memory_pos == 255) return;

@@ -33,9 +33,13 @@ const uint16_t update_data_secs_req = 4;
 uint8_t last_hour = 0;
 uint8_t passed_hours = 0;
 uint16_t passed_seconds = 0;
-uint8_t distance = 0;
+uint16_t distance = 0;
 
 enum state st = SLEEP;
+
+inline uint8_t downcast_and_compress_uint16(uint16_t data) {
+    return (uint8_t)(data >> 1);
+}
 
 inline void handle_passage_of_time(void) 
 {
@@ -130,10 +134,12 @@ void main(void)
                 }
                 break;
             case READING_SENSOR:
-            {
+                {
                 distance = read_sensor();
-                uint8_t a = 0;
-            }
+                uint8_t compressed = downcast_and_compress_uint16(distance);
+                write_uint8(compressed);
+                st = WRITING_TO_EEPROM;
+                }
                 break;
             case SERIAL_COMMUNICATION:
                 break;
