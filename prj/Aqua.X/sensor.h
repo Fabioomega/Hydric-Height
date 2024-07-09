@@ -61,14 +61,13 @@ inline void handle_tmr2_interrupt(void)
 
 inline uint16_t read_sensor(void)
 {
+    RD7 = 1;
     start_sensor_reading();
     while (echo_cycle != 1) continue;
     start_timer();
     while (echo_cycle != 0) continue;
-    tm2 = stop_timer();
-    
-    
-    
+    tm2 = stop_timer();   
+    RD7 = 0;
     return ((uint16_t) ((float)tm2*conversion_factor));
 }
 
