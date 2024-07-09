@@ -15,39 +15,48 @@ extern "C" {
 #ifdef _XTAL_FREQ
     #define FREQ _XTAL_FREQ
 #else
-    #define _XTAL_FREQ 1000000
+    #define _XTAL_FREQ 4000000
 #endif
 
-#define FREQ _XTAL_FREQ
-#define PERIOD 1.0 /( (float) FREQ / 4.0)
-#define SPEED_OF_SOUND_CM_SECS 34000.0
-#define CONVERSION_FACTOR (float) (PERIOD*SPEED_OF_SOUND_CM_SECS)
+#define FREQ ((float)_XTAL_FREQ)
+#define PERIOD 4.0f / FREQ
+#define SPEED_OF_SOUND_CM_SECS 34000.0f
+#define CONVERSION_FACTOR (PERIOD*SPEED_OF_SOUND_CM_SECS) / 2
     
 __bit echo_cycle = 0;
+uint8_t extra_timer = 0;
 const float conversion_factor = CONVERSION_FACTOR;
+
+uint16_t tm2 = 0;
 
 inline void start_timer(void)
 {
     TMR2 = 0;
+    extra_timer = 0;
     T2CONbits.TMR2ON = 1;
 }
 
-inline uint8_t stop_timer(void) 
+inline uint16_t stop_timer(void) 
 {
     T2CONbits.TMR2ON = 0;
-    return TMR2;
+    return ((uint16_t)extra_timer << 8) + (uint16_t) TMR2;
 }
 
 inline void start_sensor_reading(void) 
 {
-    RB0 = 1;
+    PORTBbits.RB0 = 1;
     __delay_ms(10);
-    RB0 = 0;
+    PORTBbits.RB0 = 0;
 }
 
 inline void handle_sensor(void)
 {
-    echo_cycle = RB4;
+    echo_cycle = PORTBbits.RB4;
+}
+
+inline void handle_tmr2_interrupt(void)
+{
+    extra_timer++;
 }
 
 inline uint8_t read_sensor(void)
@@ -56,8 +65,9 @@ inline uint8_t read_sensor(void)
     while (echo_cycle != 1) continue;
     start_timer();
     while (echo_cycle != 0) continue;
-    uint8_t time_took = stop_timer();
-    return (uint8_t)((float)time_took*conversion_factor);
+    tm2 = stop_timer();
+    
+    return (uint8_t)((uint16_t) ((float)tm2*conversion_factor));
 }
 
 #ifdef	__cplusplus
