@@ -177,6 +177,9 @@ void main(void) {
                         for (uint8_t i = 0; i < last_filled_memory_pos; i++) {
                             send_serial_packet(read_byte(i));
                         }
+                        last_filled_memory_pos = 0;
+                        passed_hours = 0;
+                        passed_seconds 0;
                     }
                 } else {
                     send_serial_packet(DONT_UNDERSTAND_MONKEY);
