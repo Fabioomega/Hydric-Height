@@ -63,6 +63,7 @@ void write_uint8(uint8_t data) {
     // Save the location to be saved at
     memory_locations[size] = last_filled_memory_pos;
     size++;
+    last_filled_memory_pos++;
 }
 
 void write_uint16(uint16_t data) {

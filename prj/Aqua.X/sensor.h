@@ -15,7 +15,7 @@ extern "C" {
 #ifdef _XTAL_FREQ
     #define FREQ _XTAL_FREQ
 #else
-    #define _XTAL_FREQ 4000000
+    #define _XTAL_FREQ 4300800
 #endif
 
 #define FREQ ((float)_XTAL_FREQ)
@@ -26,8 +26,6 @@ extern "C" {
 __bit echo_cycle = 0;
 uint8_t extra_timer = 0;
 const float conversion_factor = CONVERSION_FACTOR;
-
-uint16_t tm2 = 0;
 
 inline void start_timer(void)
 {
@@ -59,15 +57,37 @@ inline void handle_tmr2_interrupt(void)
     extra_timer++;
 }
 
+inline void disable_unecessary_interruptions()
+{
+    // No T1 interrupts <0>
+    // Setup T2 interrupts <1>
+    // No RX interrupts <5>
+    PIE1 = 0b00000010;
+}
+
+inline void reenable_unecessary_interruptions()
+{
+    // Setup T1 interrupts <0>
+    // Setup T2 interrupts <1>
+    // Setup RX interrupts <5>
+    PIE1 = 0b00100011;
+}
+
 inline uint16_t read_sensor(void)
 {
+    disable_unecessary_interruptions();
+    // Enable RB Port Change Interrupt
+    INTCONbits.RBIE = 1;
     RD7 = 1;
     start_sensor_reading();
     while (echo_cycle != 1) continue;
     start_timer();
     while (echo_cycle != 0) continue;
-    tm2 = stop_timer();   
+    uint16_t tm2 = stop_timer();
     RD7 = 0;
+    // Disable RB Port Change Interrupt
+    INTCONbits.RBIE = 0;
+    reenable_unecessary_interruptions();
     return ((uint16_t) ((float)tm2*conversion_factor));
 }
 
